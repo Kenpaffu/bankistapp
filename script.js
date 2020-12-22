@@ -65,7 +65,73 @@ const inputClosePin = document.querySelector('.form__input--pin');
 
 // Instead of working with global variables, instead get used to passing data that is needed directly into a function.
 
-const displayMovements = function (movements) {};
+const displayMovements = function (movements) {
+  containerMovements.innerHTML = '';
+  // .textContent = 0
+
+  movements.forEach(function (mov, i) {
+    const type = mov > 0 ? 'deposit' : 'withdrawal';
+
+    const html = `
+    <div class="movements__row">
+     <div class="movements__type movements__type--${type}">${
+      i + 1
+    } ${type}</div>
+      <div class="movements__value">${mov}€</div>
+    </div>`;
+
+    containerMovements.insertAdjacentHTML('afterbegin', html);
+  });
+};
+
+displayMovements(account1.movements);
+
+const calcDisplayBalance = function (movements) {
+  const balance = movements.reduce((acc, mov) => acc + mov, 0);
+  labelBalance.textContent = `${balance} €`;
+};
+
+calcDisplayBalance(account1.movements);
+
+const calcDisplaySummary = function (movements) {
+  const incomes = movements
+    .filter(mov => mov > 0)
+    .reduce((acc, mov) => acc + mov, 0);
+  labelSumIn.textContent = `${incomes}€`;
+
+  const out = movements
+    .filter(mov => mov < 0)
+    .reduce((acc, mov) => acc - mov, 0);
+  labelSumOut.textContent = `${Math.abs(out)}€`;
+
+  const interest = movements
+    .filter(mov => mov > 0)
+    .map(deposit => (deposit * 1.2) / 100)
+    .filter((int, i, arr) => {
+      // console.log(arr);
+      return int >= 1;
+    })
+    .reduce((acc, int) => acc + int, 0);
+  labelSumInterest.textContent = `${interest}€`;
+};
+
+calcDisplaySummary(account1.movements);
+
+// creating user names
+// We used forEach in this case because we wanted to have the side effects of each value in the array
+// We used the map method inside the foreach method because we wanted it to return a new array with only the initial letters before we join them back together.
+
+const createUserName = function (accs) {
+  accs.forEach(function (acc) {
+    acc.username = acc.owner
+      .toLocaleLowerCase()
+      .split(' ')
+      .map(name => name[0])
+      .join('');
+  });
+};
+
+createUserName(accounts);
 
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
@@ -152,6 +218,7 @@ console.log('----------- FOR EACH ------------');
 
 // Using the forEach()
 // forEach is a higher order function which requires a callback function in order to tell it what to do.
+
 // The forEach() method can NOT break out of a loop, if you need to break out of a loop, use a for( of ) loop,
 
 movements.forEach(function (mov, i, arr) {
@@ -189,3 +256,250 @@ currenciesUnique.forEach(function (value, _, map) {
   console.log(`${_}: ${value}`);
 });
 */
+
+//////////// CODING CHALLENGE # 1
+
+/*
+
+Julia and Kate are doing a study on dogs. So each of them asked 5 dog owners
+about their dog's age, and stored the data into an array (one array for each). For
+now, they are just interested in knowing whether a dog is an adult or a puppy.
+A dog is an adult if it is at least 3 years old, and it's a puppy if it's less than 3 years
+old.
+
+Your tasks:
+Create a function 'checkDogs', which accepts 2 arrays of dog's ages
+('dogsJulia' and 'dogsKate'), and does the following things:
+
+1. Julia found out that the owners of the first and the last two dogs actually have
+cats, not dogs! So create a shallow copy of Julia's array, and remove the cat
+ages from that copied array (because it's a bad practice to mutate function
+parameters)
+
+2. Create an array with both Julia's (corrected) and Kate's data
+
+3. For each remaining dog, log to the console whether it's an adult ("Dog number 1
+is an adult, and is 5 years old") or a puppy ("Dog number 2 is still a puppy
+🐶
+")
+
+4. Run the function for both test datasets
+*/
+
+/*
+
+Test data:
+§ Data 1: Julia's data [3, 5, 2, 12, 7], Kate's data [4, 1, 15, 8, 3]
+§ Data 2: Julia's data [9, 16, 6, 8, 3], Kate's data [10, 5, 6, 1, 4]
+
+*/
+
+/*
+const dogsJulia = [3, 5, 2, 12, 7];
+const dogsKate = [4, 1, 15, 8, 3];
+
+const dogsJuliaFixed = dogsJulia.slice(1, -2);
+
+const dogsJulia1 = [9, 16, 6, 8, 3];
+const dogsKate1 = [10, 5, 6, 1, 4];
+
+const dogsJuliaFixed1 = dogsJulia1.slice(1, -2);
+
+const checkDogs = function (arr1, arr2) {
+  const fullData = arr1.concat(arr2);
+
+  fullData.forEach(function (val, i) {
+    if (val >= 3) {
+      console.log(`Dog number ${i + 1} is an adult, and is ${val} years old`);
+    } else {
+      console.log(`Dog number ${i + 1} is still a puppy 🐶`);
+    }
+  });
+};
+
+checkDogs(dogsJuliaFixed, dogsKate);
+console.log('---Data 1 Above ------------- Data 2 Below-----');
+checkDogs(dogsJuliaFixed1, dogsKate1);
+*/
+
+//////////////// MAP, FILTER AND REDUCE
+
+// Map:
+// Returns a NEW ARRAY containing the results of applying an operation on all original array elements.
+
+// Filter:
+// Returns a NEW ARRAY containing the array elements that passed a specified test condition.
+
+// Reduce:
+// Boils ('reduces') all array elements down to one single value.
+// (e.g. adding all elements together), (multiplying), (etc)
+// No new array in this case, but just the single reduced value.
+
+/////////////////////////// MAP METHOD //////////////////
+
+/*
+// Returns an entire NEW ARRAY. Unlike forEach()
+
+const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
+
+const eurToUsd = 1.1;
+
+// More inline with functional programming
+const movementsUSD = movements.map(mov => mov * eurToUsd);
+
+console.log(movements);
+console.log(movementsUSD);
+
+// Less inline with functional programming
+const movementsUSDFor = [];
+for (const mov of movements) {
+  movementsUSDFor.push(mov * eurToUsd);
+}
+console.log(movementsUSDFor);
+
+const movementsDescriptions = movements.map(
+  (mov, i) =>
+    `Movement ${i + 1}: You ${mov > 0 ? 'deposited' : 'withdrew'} ${Math.abs(
+      mov
+    )}`
+);
+
+console.log(movementsDescriptions);
+*/
+///
+
+/////////////////////// FILTER METHOD
+
+/*
+// Used to filter through elements to find a certain condition
+
+const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
+
+const deposits = movements.filter(function (mov) {
+  return mov > 0;
+});
+const withdrawals = movements.filter(mov => mov < 0);
+
+console.log(movements);
+console.log(deposits);
+console.log(withdrawals);
+
+// same thing with for( of )
+const depositsFor = [];
+for (const mov of movements) if (mov > 0) depositsFor.push(mov);
+*/
+
+/////////////////////// REDUCE
+/*
+// Accumulator is like a snowball
+
+const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
+
+// const balance = movements.reduce(function (acc, cur, i, arr) {
+//   console.log(`Iteration ${i}: ${acc}`);
+//   return acc + cur;
+// }, 0);
+// console.log(balance);
+const balance = movements.reduce((acc, cur) => acc + cur, 0);
+console.log(balance);
+
+// manually with a for loop
+// let balance2 = 0;
+// for (const mov of movements) balance2 += mov;
+// console.log(balance2);
+
+// Maximum value of the movements array
+
+const max = movements.reduce(
+  (acc, mov) => (acc > mov ? acc : mov),
+  movements[0]
+);
+
+console.log(max);
+*/
+
+///////////////// CODING CHALLENGE #2
+/*
+Let's go back to Julia and Kate's study about dogs. This time, they want to convert
+dog ages to human ages and calculate the average age of the dogs in their study.
+
+Your tasks:
+Create a function 'calcAverageHumanAge', which accepts an arrays of dog's
+ages ('ages'), and does the following things in order:
+
+1. Calculate the dog age in human years using the following formula: if the dog is
+<= 2 years old, humanAge = 2 * dogAge. If the dog is > 2 years old,
+humanAge = 16 + dogAge * 4
+
+2. Exclude all dogs that are less than 18 human years old (which is the same as
+keeping dogs that are at least 18 years old)
+
+3. Calculate the average human age of all adult dogs (you should already know
+from other challenges how we calculate averages 😉)
+
+4. Run the function for both test datasets
+Test data:
+
+§ Data 1: [5, 2, 4, 1, 15, 8, 3]
+§ Data 2: [16, 6, 10, 5, 6, 1, 4]
+GOOD LUCK 😀
+*/
+
+/*
+const dogAge1 = [5, 2, 4, 1, 15, 8, 3];
+const dogAge2 = [16, 6, 10, 5, 6, 1, 4];
+
+const humanAge = dogAge1.map(dog => (dog <= 2 ? dog * 2 : dog * 4 + 16));
+console.log(humanAge);
+
+const adultDogs = humanAge.filter(age => age >= 18);
+console.log(adultDogs);
+
+const dogAvgAge = adultDogs.reduce(
+  (acc, age, i, arr) => (acc + age) / arr.length,
+  0
+);
+console.log(dogAvgAge);
+
+const calcAverageHumanAge = function (ages) {};
+*/
+
+///////////// THE MAGIC OF CHAINING METHODS
+/*
+const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
+
+const eurToUsd = 1.1;
+
+// PIPELINE (metaphor)... How to inspect the current array at any point of the pipeline
+const totalDepositsUSD = movements
+  .filter(mov => mov > 0)
+  // .map(mov => mov * eurToUsd)
+  .map((mov, i, arr) => {
+    // console.log(arr);
+    return mov * eurToUsd;
+  })
+  .reduce((acc, mov) => acc + mov, 0);
+console.log(totalDepositsUSD);
+*/
+
+////////////////// CODING CHALLENGE #3
+/*
+Rewrite the 'calcAverageHumanAge' function from Challenge #2, but this time
+as an arrow function, and using chaining!
+
+Test data:
+§ Data 1: [5, 2, 4, 1, 15, 8, 3]
+§ Data 2: [16, 6, 10, 5, 6, 1, 4]
+*/
+
+const dogAge1 = [5, 2, 4, 1, 15, 8, 3];
+const dogAge2 = [16, 6, 10, 5, 6, 1, 4];
+
+const calcAverageHumanAge = ages =>
+  ages
+    .map(dog => (dog <= 2 ? dog * 2 : dog * 4 + 16))
+    .filter((dog, i, arr) => dog >= 18)
+    .reduce((acc, age, i, arr) => acc + age / arr.length, 0);
+
+console.log(calcAverageHumanAge(dogAge1));
+console.log(calcAverageHumanAge(dogAge2));
