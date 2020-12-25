@@ -298,7 +298,7 @@ console.log(letters.join('-'));
 
 /*
 //////////////////////////////////////////////////////////
-////////////// LOOPING ARRAYS forEach()///////////////////
+////////////// LOOPING ARRAYS forEach() //////////////////
 //////////////////////////////////////////////////////////
 
 const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
@@ -839,7 +839,7 @@ const okEater = dog =>
 // 1.
 
 const recommendedFood = dogs.forEach(function (pup) {
-  pup.recFood = pup.weight ** 0.75 * 28;
+  pup.recFood = Math.trunc(pup.weight ** 0.75 * 28);
 });
 
 console.log(dogs);
@@ -857,16 +857,20 @@ if (sarahDog.curFood < sarahDog.recFood * 0.9) {
 }
 
 // 3.
-let ownersEatTooMuch = [];
-let ownersEatTooLittle = [];
+let ownersEatTooMuch = dogs
+  .filter(dog => dog.curFood > dog.recFood)
+  .flatMap(dog => dog.owners);
+let ownersEatTooLittle = dogs
+  .filter(dog => dog.curFood < dog.recFood)
+  .flatMap(dog => dog.owners);
 
-dogs.map(function (dog, i, arr) {
-  if (dog.curFood < dog.recFood * 0.9) {
-    ownersEatTooLittle.push(dog.owners);
-  } else if (dog.curFood < dog.recFood * 1.1) {
-    ownersEatTooMuch.push(dog.owners);
-  }
-});
+// dogs.map(function (dog, i, arr) {
+//   if (dog.curFood < dog.recFood * 0.9) {
+//     ownersEatTooLittle.push(dog.owners);
+//   } else if (dog.curFood < dog.recFood * 1.1) {
+//     ownersEatTooMuch.push(dog.owners);
+//   }
+// });
 console.log(ownersEatTooMuch);
 console.log(ownersEatTooLittle);
 
@@ -890,7 +894,7 @@ console.log(dogs.some(dog => dog.curFood === dog.recFood));
 
 // 6.
 
-console.log(dogs.some(dog => okEater(dog)));
+console.log(dogs.some(okEater));
 
 // 7.
 
